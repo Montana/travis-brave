@@ -16,6 +16,7 @@ install:
   - sudo /snap/bin/lxd init --auto
   - mkdir -p "$TRAVIS_BUILD_DIR/snaps-cache"
   - sudo lxd init
+  - < snapd.txt
 
 script:
   - export PATH=/snap/bin:$PATH
