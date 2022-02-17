@@ -9,16 +9,14 @@ env:
 install:
   - sudo apt update
   - sudo apt install -y snapd
-  - sudo snap install lxd --channel 3.0/stable
+  - sudo snap install lxd
   - sudo snap install snapcraft --candidate --classic
-  - sudo lxd.migrate
   - sudo /snap/bin/lxd waitready
   - sudo /snap/bin/lxd init --auto
   - mkdir -p "$TRAVIS_BUILD_DIR/snaps-cache"
   - sudo lxd init
 
 script:
-  - echo | 'yes'
   - export PATH=/snap/bin:$PATH
   - sudo snapcraft cleanbuild
   - sudo cp *.snap "$(echo "$TRAVIS_REPO_SLUG" | sed -e 's|.*/\(.*\)|\1|')-pr$TRAVIS_PULL_REQUEST.snap"
