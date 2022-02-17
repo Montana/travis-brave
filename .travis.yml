@@ -1,12 +1,8 @@
-language: bash
-os: linux
-sudo: enabled
-env:
-  global:
-    - LC_ALL: C.UTF-8
-    - LANG: C.UTF-8
+dist: trusty
+language: generic
 
-install:
+script:
+  - set -eo pipefail
   - sudo groupadd --system lxd
   - sudo usermod -a -G lxd $USER
   - sudo apt-get -qq update
@@ -19,19 +15,3 @@ install:
   - sudo lxd.lxc launch images:alpine/3.5 alpine --profile travis
   - sudo lxd.lxc config device add alpine travis disk source="$PWD" path=/travis
   - sudo lxd.lxc exec alpine -- ls -al /travis
-  - sleep 5
-  - sudo lxd.lxc exec alpine -- ping github.com -c 2
-  
-script:
-  - export PATH=/snap/bin:$PATH
-  - sudo snapcraft cleanbuild
-  - sudo cp *.snap "$(echo "$TRAVIS_REPO_SLUG" | sed -e 's|.*/\(.*\)|\1|')-pr$TRAVIS_PULL_REQUEST.snap"
-
-after_success:
-  - sudo snap install transfer
-  - timeout 180 sudo /snap/bin/transfer "$(echo "$TRAVIS_REPO_SLUG" | sed -e 's|.*/\(.*\)|\1|')-pr$TRAVIS_PULL_REQUEST.snap"
-
-after_failure:
-  - sudo journalctl -u snapd
-  - sudo snap install http
-  - /snap/bin/http https://api.snapcraft.io/v2/snaps/info/core architecture==amd64 Snap-Device-Series:16
