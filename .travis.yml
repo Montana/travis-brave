@@ -1,17 +1,26 @@
-dist: trusty
-language: generic
+language: shell
+dist: xenial
+os: linux
+
+env:
+  global:
+    - LC_ALL: C.UTF-8
+    - LANG: C.UTF-8
+    - SNAPCRAFT_ENABLE_SILENT_REPORT: y
+    - SNAPCRAFT_BUILD_INFO: 1
+    - SNAPCRAFT_BUILD_ENVIRONMENT: 'lxd'
+
+addons:
+  snaps:
+    - name: snapcraft
+      channel: stable
+      confinement: classic
+    - name: lxd
+      channel: stable
 
 script:
-  - set -eo pipefail
-  - sudo groupadd --system lxd
-  - sudo usermod -a -G lxd $USER
-  - sudo apt-get -qq update
-  - sudo apt-get --yes install snapd
-  - sudo snap install lxd
-  - sudo lxd waitready
-  - printf 'n\ny\ndefault\ndir\nn\ny\nlxdbr0\nauto\nauto\ny\nall\n\ny\nn\n' | sudo lxd init
-  - sudo lxd.lxc profile copy default travis
-  - sudo lxd.lxc profile set travis security.privileged true
-  - sudo lxd.lxc launch images:alpine/3.5 alpine --profile travis
-  - sudo lxd.lxc config device add alpine travis disk source="$PWD" path=/travis
-  - sudo lxd.lxc exec alpine -- ls -al /travis
+  - sudo usermod --append --groups lxd $USER
+  - sudo /snap/bin/lxd.migrate -yes
+  - sudo /snap/bin/lxd waitready
+  - sudo /snap/bin/lxd init --auto
+  - sg lxd -c snapcraft
